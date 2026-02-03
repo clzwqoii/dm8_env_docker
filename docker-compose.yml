@@ -8,30 +8,30 @@ services:
     image: sizx/dm8:latest
     container_name: dm8-server
     hostname: dm8
-    platform: linux/amd64  # M1/M2/M3 Mac需要指定平台使用Rosetta
-    
+    platform: linux/amd64 # M1/M2/M3 Mac需要指定平台使用Rosetta
+
     # 端口映射
     ports:
-      - "5236:5236"  # 达梦数据库端口
-      - "8081:8080"  # DM管理工具端口(如有)
-    
+      - "5236:5236" # 达梦数据库端口
+      - "8081:8080" # DM管理工具端口(如有)
+
     # 环境变量
     environment:
       - PAGE_SIZE=16
       - EXTENT_SIZE=16
       - CASE_SENSITIVE=Y
-      - CHARSET=1  # 0=GB18030, 1=UTF-8
+      - CHARSET=1 # 0=GB18030, 1=UTF-8
       - LENGTH_IN_CHAR=Y
       - DB_NAME=DAMENG
       - INSTANCE_NAME=DMSERVER
       - PORT_NUM=5236
-      - SYSDBA_PWD=123456
-    
+      - SYSDBA_PWD=123abc!@#
+
     # 数据持久化
     volumes:
       - ./dm8/data:/opt/dmdbms/data
       - ./dm8/backup:/opt/dmdbms/backup
-    
+
     # 资源限制
     deploy:
       resources:
@@ -39,51 +39,52 @@ services:
           memory: 4G
         reservations:
           memory: 2G
-    
+
     # 健康检查
     healthcheck:
-      test: ["CMD", "bash", "-c", "echo 'SELECT 1' | /opt/dmdbms/bin/disql SYSDBA/123456@localhost:5236"]
+      test: [ "CMD", "bash", "-c", "echo 'SELECT 1' | /opt/dmdbms/bin/disql SYSDBA/123abc!@#@localhost:5236" ]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 60s
-    
+
     # 自动重启
     restart: unless-stopped
-    
+
     # 网络
     networks:
       - dm8-network
 
   # PHP 8.3 + FPM + 达梦/Swoole/Phalcon/YAC扩展
   php-dm:
+    platform: linux/amd64
     build:
-      context: ./php
-      dockerfile: Dockerfile
-    
+      context: .
+      dockerfile: php/Dockerfile
+
     container_name: php-dm
     hostname: php-dm
-    
+
     # 代码目录挂载 - 直接挂载 ~/Sites 方便开发
     # Mac用户把项目放在 ~/Sites/ 目录下即可自动同步
     volumes:
       - ~/Sites:/var/www/html:cached
       - ./php/php.ini:/usr/local/etc/php/php.ini
-    
+
     # 依赖达梦数据库(已移除健康检查依赖，即使dm8拉取失败也能启动PHP)
     depends_on:
       - dm8
-    
+
     # 环境变量
     environment:
       - DM_HOST=dm8
       - DM_PORT=5236
       - DM_USER=SYSDBA
-      - DM_PWD=123456
-    
+      - DM_PWD=123abc!@#
+
     # 自动重启
     restart: unless-stopped
-    
+
     # 网络
     networks:
       - dm8-network
@@ -92,24 +93,24 @@ services:
   nginx:
     image: nginx:alpine
     container_name: dm8-nginx
-    
+
     ports:
       # 使用8080端口避免与本地Nginx冲突
       # 访问地址: http://dm8.local:8080 或 http://localhost:8080
       - "8080:80"
-      - "8443:443"  # HTTPS（可选）
-    
+      - "8443:443" # HTTPS（可选）
+
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       # 和PHP挂载同一个目录
       - ~/Sites:/var/www/html:cached
-    
+
     depends_on:
       - php-dm
-    
+
     restart: unless-stopped
-    
+
     networks:
       - dm8-network
 

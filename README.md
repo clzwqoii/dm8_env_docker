@@ -2,6 +2,31 @@
 
 专为Mac开发环境设计，解决本地PHP无法安装达梦扩展的问题。
 
+# 默认创建镜像流程
+# 如果开启vpn, 网络不稳定, 可以关闭vpn
+```
+# 重建PHP镜像
+docker compose build --no-cache php-dm
+
+# 构建（并启动）
+docker compose up -d --build
+
+# 启动（已存在的容器）
+docker compose start
+
+# 停止
+docker compose stop
+
+# 重启
+docker compose restart
+
+# 验证 PHP 扩展
+# 我们需要确认编译的扩展已正确加载。我们将运行：
+docker compose exec php-dm php -m | grep -E 'phalcon|swoole|yac|dm|pdo_dm'
+# 在浏览器中打开
+http://dm8.local:8080/ 或 http://localhost:8080/phpinfo.php
+```
+
 **极简启动**: `docker-compose up -d`
 
 ## 架构
@@ -105,10 +130,10 @@ docker-compose down
 ```php
 <?php
 // PDO方式
-$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', '123456');
+$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', '123abc!@#');
 
 // 达梦原生方式
-$conn = dm_connect('dm8:5236', 'SYSDBA', '123456');
+$conn = dm_connect('dm8:5236', 'SYSDBA', '123abc!@#');
 ?>
 ```
 
@@ -120,7 +145,7 @@ $conn = dm_connect('dm8:5236', 'SYSDBA', '123456');
 - X86: `latest`, `1-2-128-22.08.04-166351-20005-CTM`
 - ARM(M1/M2/M3): `1-3-12-2023.04.17-187846-20040-ENT`
 
-默认账号: SYSDBA / 123456
+默认账号: SYSDBA / 123abc!@#
 
 ## 常用命令
 
@@ -137,11 +162,24 @@ docker-compose exec php-dm bash
 # 进入达梦容器
 docker-compose exec dm8 bash
 
-# 重建PHP镜像
-docker-compose build --no-cache php-dm
 
 # 完全重置（删除数据库）
 docker-compose down -v
+
+# 重建PHP镜像
+docker-compose build --no-cache php-dm
+
+# 构建（并启动）
+docker compose up -d --build
+
+# 启动（已存在的容器）
+docker compose start
+
+# 停止
+docker compose stop
+
+# 重启
+docker compose restart
 ```
 
 ## 开发提示

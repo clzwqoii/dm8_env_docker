@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,17 +13,20 @@
             padding: 20px;
             background: #f5f5f5;
         }
+
         .container {
             background: white;
             padding: 40px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+
         h1 {
             color: #333;
             border-bottom: 3px solid #1890ff;
             padding-bottom: 10px;
         }
+
         .card {
             background: #f8f9fa;
             border-left: 4px solid #1890ff;
@@ -30,6 +34,7 @@
             margin: 20px 0;
             border-radius: 4px;
         }
+
         .btn {
             display: inline-block;
             padding: 12px 24px;
@@ -40,21 +45,26 @@
             margin: 10px 5px;
             transition: background 0.3s;
         }
+
         .btn:hover {
             background: #40a9ff;
         }
+
         .btn-secondary {
             background: #52c41a;
         }
+
         .btn-secondary:hover {
             background: #73d13d;
         }
+
         code {
             background: #f1f1f1;
             padding: 2px 6px;
             border-radius: 3px;
             font-family: 'Courier New', monospace;
         }
+
         .info {
             background: #e6f7ff;
             border: 1px solid #91d5ff;
@@ -62,15 +72,17 @@
             border-radius: 4px;
             margin: 20px 0;
         }
+
         ul {
             line-height: 2;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>达梦数据库 (DM8) + PHP 环境</h1>
-        
+
         <div class="card">
             <h2>环境已就绪！</h2>
             <p>达梦数据库和PHP环境已成功部署。</p>
@@ -81,7 +93,7 @@
             <ul>
                 <li><strong>达梦数据库：</strong> <code>dm8:5236</code></li>
                 <li><strong>默认账号：</strong> <code>SYSDBA</code></li>
-                <li><strong>默认密码：</strong> <code>123456</code></li>
+                <li><strong>默认密码：</strong> <code>123abc!@#</code></li>
                 <li><strong>PHP版本：</strong> 8.1</li>
             </ul>
         </div>
@@ -120,10 +132,10 @@ docker-compose down
             <pre style="background: #f1f1f1; padding: 15px; overflow-x: auto;">
 &lt;?php
 // PDO方式
-$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', '123456');
+$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', '123abc!@#');
 
 // 或者使用dm扩展
-$conn = dm_connect('dm8:5236', 'SYSDBA', '123456');
+$conn = dm_connect('dm8:5236', 'SYSDBA', '123abc!@#');
 ?&gt;
             </pre>
         </div>
@@ -137,9 +149,11 @@ $conn = dm_connect('dm8:5236', 'SYSDBA', '123456');
             </ul>
         </div>
 
-        <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e8e8e8; color: #999; text-align: center;">
+        <footer
+            style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e8e8e8; color: #999; text-align: center;">
             <p>达梦数据库 Docker 环境 &copy; 2024</p>
         </footer>
     </div>
 </body>
+
 </html>
