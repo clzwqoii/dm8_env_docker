@@ -93,7 +93,7 @@
             <ul>
                 <li><strong>达梦数据库：</strong> <code>dm8:5236</code></li>
                 <li><strong>默认账号：</strong> <code>SYSDBA</code></li>
-                <li><strong>默认密码：</strong> <code>Dameng123</code></li>
+                <li><strong>默认密码：</strong> <code>123456</code></li>
                 <li><strong>PHP版本：</strong> 8.1</li>
             </ul>
         </div>
@@ -132,10 +132,10 @@ docker-compose down
             <pre style="background: #f1f1f1; padding: 15px; overflow-x: auto;">
 &lt;?php
 // PDO方式
-$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', 'Dameng123');
+$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', '123456');
 
 // 或者使用dm扩展
-$conn = dm_connect('dm8:5236', 'SYSDBA', 'Dameng123');
+$conn = dm_connect('dm8:5236', 'SYSDBA', '123456');
 ?&gt;
             </pre>
         </div>

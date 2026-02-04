@@ -20,6 +20,9 @@ docker compose stop
 # 重启
 docker compose restart
 
+# 重启容器以应用新的 Volume 挂载
+docker compose up -d --force-recreate
+
 # 验证 PHP 扩展
 # 我们需要确认编译的扩展已正确加载。我们将运行：
 docker compose exec php-dm php -m | grep -E 'phalcon|swoole|yac|dm|pdo_dm'
@@ -140,10 +143,10 @@ docker-compose down
 ```php
 <?php
 // PDO方式
-$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', 'Dameng123');
+$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', '123456');
 
 // 达梦原生方式
-$conn = dm_connect('dm8:5236', 'SYSDBA', 'Dameng123');
+$conn = dm_connect('dm8:5236', 'SYSDBA', '123456');
 ?>
 ```
 
@@ -155,7 +158,7 @@ $conn = dm_connect('dm8:5236', 'SYSDBA', 'Dameng123');
 - X86: `latest`, `1-2-128-22.08.04-166351-20005-CTM`
 - ARM(M1/M2/M3): `1-3-12-2023.04.17-187846-20040-ENT`
 
-默认账号: SYSDBA / Dameng123
+默认账号: SYSDBA / 123456
 
 ## 本地图形化工具连接 (DBeaver / DM管理工具)
 
@@ -166,7 +169,7 @@ $conn = dm_connect('dm8:5236', 'SYSDBA', 'Dameng123');
 | **主机 (Host)** | `127.0.0.1` 或 `localhost` | 因为映射到了本机端口 |
 | **端口 (Port)** | `5236` | 达梦默认端口 |
 | **用户名 (User)** | `SYSDBA` | 超级管理员 |
-| **密码 (Password)** | `Dameng123` | 配置文件中设置的密码 |
+| **密码 (Password)** | `123456` | 配置文件中设置的密码 |
 | **驱动 (Driver)** | DM JDBC | 达梦提供的 JDBC 驱动 |
 
 **注意**：如果是第一次运行，请参考下方的“完全重置”命令确保密码生效。

@@ -3,9 +3,10 @@ services:
   # 使用社区镜像 sizx/dm8 (基于达梦官方版本)
   # 支持的tag格式 (根据架构选择):
   #   X86架构: latest, 1-2-128-22.08.04-166351-20005-CTM, ft-yhqlv4.0-v1-3-12-2023.04.17-187846-20040-ENT
-  #   ARM架构: 1-3-12-2023.04.17-187846-20040-ENT
+  #   ARM架构: sizx/dm8:ft-yhqlv4.0-v1-3-12-2023.04.17-187846-20040-ENT ARM架构密码为SYSDBA
   dm8:
-    image: sizx/dm8:1-3-12-2023.04.17-187846-20040-ENT
+    # 切换为 ARM64 适配镜像，提升 Mac M芯片性能
+    image: sizx/dm8:ft-yhqlv4.0-v1-3-12-2023.04.17-187846-20040-ENT
     container_name: dm8-server
     hostname: dm8
     # platform: linux/amd64 # M1/M2/M3 Mac 使用原生ARM镜像不需要指定平台
@@ -25,7 +26,7 @@ services:
       - DB_NAME=DAMENG
       - INSTANCE_NAME=DMSERVER
       - PORT_NUM=5236
-      - SYSDBA_PWD=Dameng123
+      - SYSDBA_PWD=123456
 
     # 数据持久化
     volumes:
@@ -42,7 +43,7 @@ services:
 
     # 健康检查
     healthcheck:
-      test: [ "CMD", "bash", "-c", "echo 'SELECT 1' | /home/dmdba/dmdbms/bin/disql 'SYSDBA/Dameng123@localhost:5236'" ]
+      test: [ "CMD", "bash", "-c", "echo 'SELECT 1' | /home/dmdba/dmdbms/bin/disql 'SYSDBA/123456@localhost:5236'" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -57,7 +58,7 @@ services:
 
   # PHP 8.3 + FPM + 达梦/Swoole/Phalcon/YAC扩展
   php-dm:
-    platform: linux/amd64
+    platform: linux/amd64 # 必须使用x86架构，因为达梦PHP扩展(.so)是x86版本的
     build:
       context: .
       dockerfile: php/Dockerfile
@@ -80,7 +81,7 @@ services:
       - DM_HOST=dm8
       - DM_PORT=5236
       - DM_USER=SYSDBA
-      - DM_PWD=Dameng123
+      - DM_PWD=123456
 
     # 自动重启
     restart: unless-stopped

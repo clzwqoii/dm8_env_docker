@@ -5,7 +5,7 @@ header('Content-Type: text/plain; charset=utf-8');
 $host = 'dm8';
 $port = 5236;
 $user = 'SYSDBA';
-$pass = 'Dameng123';
+$pass = '123456';
 
 echo "正在尝试连接到达梦数据库...\n";
 echo "Host: $host\n";
