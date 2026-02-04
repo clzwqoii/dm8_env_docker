@@ -24,7 +24,7 @@ docker compose restart
 # 我们需要确认编译的扩展已正确加载。我们将运行：
 docker compose exec php-dm php -m | grep -E 'phalcon|swoole|yac|dm|pdo_dm'
 # 在浏览器中打开
-http://dm8.local:8080/ 或 http://localhost:8080/phpinfo.php
+http://dm8.local
 ```
 
 **极简启动**: `docker-compose up -d`
@@ -54,6 +54,20 @@ Mac本地 ~/Sites/          Docker容器
 │   └── index.php
 └── ...
 ```
+### 域名映射
+
+# DM8 Docker 开发环境
+127.0.0.1       dm8.local
+127.0.0.1       docker.yaanair.org
+
+# 项目子域名 (Docker Optimized)
+127.0.0.1       emergency.docker.yaanair.org
+127.0.0.1       lot.docker.yaanair.org
+127.0.0.1       remotegas.docker.yaanair.org
+127.0.0.1       voc.docker.yaanair.org
+127.0.0.1       env.docker.yaanair.org
+127.0.0.1       polluter.docker.yaanair.org
+127.0.0.1       data.docker.yaanair.org
 
 ### 2. 启动容器
 
@@ -91,13 +105,9 @@ sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
 ### 4. 访问项目
 
 使用域名访问（推荐）：
-- http://dm8.local:8080/ - 显示项目列表
-- http://dm8.local:8080/myapp/ - 访问myapp项目
-- http://dm8.local:8080/check_extensions.php - 检测PHP扩展
-
-或使用端口访问：
-- http://localhost:8080/myapp/
-- http://localhost:8080/
+- http://dm8.local - 显示项目列表
+- http://dm8.local/myapp/ - 访问myapp项目
+- http://dm8.local/check_extensions.php - 检测PHP扩展
 
 ### 4. 停止容器
 
@@ -130,10 +140,10 @@ docker-compose down
 ```php
 <?php
 // PDO方式
-$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', '123abc!@#');
+$pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', 'Dameng123');
 
 // 达梦原生方式
-$conn = dm_connect('dm8:5236', 'SYSDBA', '123abc!@#');
+$conn = dm_connect('dm8:5236', 'SYSDBA', 'Dameng123');
 ?>
 ```
 
@@ -145,7 +155,21 @@ $conn = dm_connect('dm8:5236', 'SYSDBA', '123abc!@#');
 - X86: `latest`, `1-2-128-22.08.04-166351-20005-CTM`
 - ARM(M1/M2/M3): `1-3-12-2023.04.17-187846-20040-ENT`
 
-默认账号: SYSDBA / 123abc!@#
+默认账号: SYSDBA / Dameng123
+
+## 本地图形化工具连接 (DBeaver / DM管理工具)
+
+如果你想用本地电脑上的工具管理 Docker 中的数据库，请使用以下配置：
+
+| 参数 | 值 | 说明 |
+|------|----|------|
+| **主机 (Host)** | `127.0.0.1` 或 `localhost` | 因为映射到了本机端口 |
+| **端口 (Port)** | `5236` | 达梦默认端口 |
+| **用户名 (User)** | `SYSDBA` | 超级管理员 |
+| **密码 (Password)** | `Dameng123` | 配置文件中设置的密码 |
+| **驱动 (Driver)** | DM JDBC | 达梦提供的 JDBC 驱动 |
+
+**注意**：如果是第一次运行，请参考下方的“完全重置”命令确保密码生效。
 
 ## 常用命令
 

@@ -5,10 +5,10 @@ services:
   #   X86架构: latest, 1-2-128-22.08.04-166351-20005-CTM, ft-yhqlv4.0-v1-3-12-2023.04.17-187846-20040-ENT
   #   ARM架构: 1-3-12-2023.04.17-187846-20040-ENT
   dm8:
-    image: sizx/dm8:latest
+    image: sizx/dm8:1-3-12-2023.04.17-187846-20040-ENT
     container_name: dm8-server
     hostname: dm8
-    platform: linux/amd64 # M1/M2/M3 Mac需要指定平台使用Rosetta
+    # platform: linux/amd64 # M1/M2/M3 Mac 使用原生ARM镜像不需要指定平台
 
     # 端口映射
     ports:
@@ -25,7 +25,7 @@ services:
       - DB_NAME=DAMENG
       - INSTANCE_NAME=DMSERVER
       - PORT_NUM=5236
-      - SYSDBA_PWD=123abc!@#
+      - SYSDBA_PWD=Dameng123
 
     # 数据持久化
     volumes:
@@ -42,7 +42,7 @@ services:
 
     # 健康检查
     healthcheck:
-      test: [ "CMD", "bash", "-c", "echo 'SELECT 1' | /opt/dmdbms/bin/disql SYSDBA/123abc!@#@localhost:5236" ]
+      test: [ "CMD", "bash", "-c", "echo 'SELECT 1' | /home/dmdba/dmdbms/bin/disql 'SYSDBA/Dameng123@localhost:5236'" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -80,7 +80,7 @@ services:
       - DM_HOST=dm8
       - DM_PORT=5236
       - DM_USER=SYSDBA
-      - DM_PWD=123abc!@#
+      - DM_PWD=Dameng123
 
     # 自动重启
     restart: unless-stopped
@@ -95,8 +95,7 @@ services:
     container_name: dm8-nginx
 
     ports:
-      # 使用8080端口避免与本地Nginx冲突
-      # 访问地址: http://dm8.local:8080 或 http://localhost:8080
+      # 访问地址: http://dm8.local:8080 (或通过本地Nginx代理)
       - "8080:80"
       - "8443:443" # HTTPS（可选）
 

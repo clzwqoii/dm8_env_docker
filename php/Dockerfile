@@ -117,13 +117,16 @@ RUN echo "yac.enable=1" >> /usr/local/etc/php/conf.d/yac.ini && \
 
 # ============ 安装达梦PHP扩展 ============
 # 方式1：使用预编译的扩展文件（推荐）
+# 必须先安装基础依赖库 (从 dm8 容器中提取)
+COPY dm_php_pdo/libdmdpi.so /usr/lib/libdmdpi.so
+
 # PHP 8.3 对应的扩展文件
 COPY dm_php_pdo/libphp83_dm.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/dm.so
 COPY dm_php_pdo/php83_pdo_dm.so /usr/local/lib/php/extensions/no-debug-non-zts-20230831/pdo_dm.so
 
 # 启用达梦扩展（在php.ini中配置）
-RUN echo "extension=dm.so" >> /usr/local/etc/php/conf.d/dm.ini && \
-    echo "extension=pdo_dm.so" >> /usr/local/etc/php/conf.d/dm.ini
+RUN echo "extension=dm.so" >> /usr/local/etc/php/conf.d/z-dm.ini && \
+    echo "extension=pdo_dm.so" >> /usr/local/etc/php/conf.d/z-dm.ini
 
 # 设置时区
 RUN echo "date.timezone=Asia/Shanghai" >> /usr/local/etc/php/conf.d/timezone.ini

@@ -15,7 +15,7 @@ $db_config = [
     'host' => $_ENV['DM_HOST'] ?? 'dm8',
     'port' => $_ENV['DM_PORT'] ?? '5236',
     'user' => $_ENV['DM_USER'] ?? 'SYSDBA',
-    'password' => $_ENV['DM_PWD'] ?? '123abc!@#',
+    'password' => $_ENV['DM_PWD'] ?? 'Dameng123',
     'database' => 'SYSTEM'
 ];
 

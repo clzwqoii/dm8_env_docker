@@ -1,0 +1,36 @@
+# ==============================================================================
+# 本地 Nginx 反向代理配置示例
+# 作用：将 *.dm8.local 和 *.docker.yaanair.org 的请求转发给 Docker 容器 (端口 8080)
+# ==============================================================================
+# 使用方法：
+# 1. 复制此文件内容到您本地 Nginx 的配置文件中 (例如 /usr/local/etc/nginx/servers/docker-dm8.conf)
+# 2. 重启本地 Nginx: brew services restart nginx
+# ==============================================================================
+
+server {
+    listen 80;
+    
+    # 匹配 Docker 环境的所有域名
+    server_name dm8.local *.dm8.local docker.yaanair.org *.docker.yaanair.org;
+
+    # 字符集
+    charset utf-8;
+
+    location / {
+        # 转发到 Docker 容器的 8080 端口
+        proxy_pass http://127.0.0.1:8080;
+        
+        # 传递 Host 头，让 Docker Nginx 知道访问的是哪个子域名
+        proxy_set_header Host $host;
+        
+        # 传递真实 IP
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # 支持 WebSocket (Swoole 需要)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}

@@ -51,7 +51,7 @@ start_db() {
         echo "达梦数据库启动成功！"
         echo "端口: 5236"
         echo "默认用户: SYSDBA"
-        echo "默认密码: 123abc!@#"
+        echo "默认密码: Dameng123"
     else
         echo "达梦数据库启动失败，请检查日志"
         exit 1
@@ -60,10 +60,10 @@ start_db() {
 
 # 修改默认密码
 change_password() {
-    if [ -n "$SYSDBA_PWD" ] && [ "$SYSDBA_PWD" != "123abc!@#" ]; then
+    if [ -n "$SYSDBA_PWD" ] && [ "$SYSDBA_PWD" != "Dameng123" ]; then
         echo "修改SYSDBA密码..."
         echo "ALTER USER SYSDBA IDENTIFIED BY \"$SYSDBA_PWD\";" | \
-            $DM_HOME/bin/disql SYSDBA/123abc!@#@localhost:5236
+            $DM_HOME/bin/disql SYSDBA/Dameng123@localhost:5236
     fi
 }
 

@@ -4,11 +4,12 @@
 
 默认情况下：
 - 本地Nginx使用 `localhost:80`
-- Docker Nginx使用 `localhost:8080`（端口不同，不容易区分）
+- Docker Nginx使用 `dm8.local`
 
 配置自定义域名后：
 - 本地项目 → `http://localhost`
-- Docker项目 → `http://dm8.local:8080` 或 `http://project.dm8.local:8080`
+- Docker项目 → `http://dm8.local` (通过本地Nginx反代)
+- Docker原始端口 → `http://dm8.local:8080`
 
 ## 配置步骤
 
@@ -20,18 +21,19 @@ sudo nano /etc/hosts
 
 ### 2. 添加域名映射
 
-```
 # DM8 Docker 开发环境
 127.0.0.1       dm8.local
-127.0.0.1       phpinfo.dm8.local
-127.0.0.1       test.dm8.local
+127.0.0.1       docker.yaanair.org
 
-# 项目子域名（可选，为每个项目配置独立域名）
-# 格式: 127.0.0.1  <项目名>.dm8.local
-127.0.0.1       myapp.dm8.local
-127.0.0.1       project1.dm8.local
-127.0.0.1       project2.dm8.local
-```
+# 项目子域名 (Docker Optimized)
+127.0.0.1       emergency.docker.yaanair.org
+127.0.0.1       lot.docker.yaanair.org
+127.0.0.1       remotegas.docker.yaanair.org
+127.0.0.1       voc.docker.yaanair.org
+127.0.0.1       env.docker.yaanair.org
+127.0.0.1       polluter.docker.yaanair.org
+127.0.0.1       data.docker.yaanair.org
+
 
 ### 3. 刷新 DNS 缓存
 
@@ -63,9 +65,8 @@ ping dm8.local
 | 方式 | 地址 | 适用场景 |
 |------|------|----------|
 | 本地Nginx | `http://localhost` | 本地PHP项目 |
-| Docker Nginx | `http://localhost:8080` | 临时访问 |
-| Docker域名 | `http://dm8.local:8080` | **推荐，清晰区分** |
-| 项目子域名 | `http://myapp.dm8.local:8080` | 独立项目访问 |
+| Docker Nginx | `http://dm8.local:8080` | 如果本地Nginx挂了，可用此端口 |
+| **混合模式** | `http://dm8.local` | **同时支持本地和Docker开发（推荐）** |
 
 ## 示例项目访问
 
@@ -80,15 +81,12 @@ ping dm8.local
 
 ### 访问方式 1：使用主域名 + 路径
 ```
-http://dm8.local:8080/myapp/       → 访问 myapp 项目
-http://dm8.local:8080/api/         → 访问 api 项目
-http://dm8.local:8080/             → 显示项目列表
+http://dm8.local             → 显示项目列表
 ```
 
 ### 访问方式 2：使用子域名（需要配置hosts）
 ```
-http://myapp.dm8.local:8080/       → 直接访问 myapp 项目
-http://api.dm8.local:8080/         → 直接访问 api 项目
+http://api.dm8.local        → 直接访问 api 项目
 ```
 
 ## 配置项目子域名（可选）
@@ -99,7 +97,7 @@ http://api.dm8.local:8080/         → 直接访问 api 项目
 # myapp 项目专用域名
 server {
     listen 80;
-    server_name myapp.dm8.local;
+    server_name docker.yaanair.org;
     root /var/www/html/myapp;
     index index.php;
 
@@ -149,7 +147,7 @@ cat /etc/hosts | grep dm8
 ```
 
 ### 4. 端口访问被拒绝
-如果访问 `dm8.local:8080` 显示拒绝连接，检查：
+如果访问 `dm8.local` 显示拒绝连接，检查：
 ```bash
 # 容器是否运行
 docker-compose ps
@@ -161,12 +159,3 @@ lsof -i :8080
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
 ```
 
-## 简化配置（推荐）
-
-如果你不想配置 hosts，可以直接使用端口访问：
-```
-http://localhost:8080/myapp/
-http://localhost:8080/api/
-```
-
-但配置域名后更清晰，推荐开发时使用。

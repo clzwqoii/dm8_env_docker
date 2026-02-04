@@ -10,10 +10,10 @@ $projects = [];
 // 扫描目录
 if (is_dir($sitesDir)) {
     $dirs = scandir($sitesDir);
-    foreach ($dirs as $dir) {
+foreach ($dirs as $dir) {
         // 跳过隐藏文件和特殊目录
         if ($dir === '.' || $dir === '..' || $dir[0] === '.') {
-            continue;
+        continue;
         }
         
         $path = $sitesDir . '/' . $dir;
