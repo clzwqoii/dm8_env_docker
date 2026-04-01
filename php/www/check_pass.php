@@ -1,6 +1,5 @@
 <?php
 $candidates = [
-    'Dameng123',
     'SYSDBA',
     '123456',
     '123456789',
