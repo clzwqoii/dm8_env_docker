@@ -123,7 +123,8 @@ docker-compose down
 | 本地路径 | Docker路径 | 用途 |
 |---------|-----------|------|
 | ~/Sites/ | /var/www/html/ | 你的PHP项目代码 |
-| ./dm8/data/ | /opt/dmdbms/data/ | 达梦数据库文件 |
+| ./dm8/data/ | /home/dmdba/data/ | 达梦数据库文件 |
+| ./dm8/backup/ | /home/dmdba/backup/ | 达梦数据库备份 |
 | ./php/php.ini | /usr/local/etc/php/php.ini | PHP配置 |
 | ./nginx/conf.d/ | /etc/nginx/conf.d/ | Nginx配置 |
 
@@ -148,6 +149,44 @@ $pdo = new PDO('dm:host=dm8;port=5236;dbname=SYSTEM', 'SYSDBA', '123456');
 // 达梦原生方式
 $conn = dm_connect('dm8:5236', 'SYSDBA', '123456');
 ?>
+```
+
+## UTF-8 编码与中文乱码排查
+
+如果中文出现乱码，先在容器里检查数据库实例是否为 Unicode：
+
+```bash
+docker compose exec dm8 bash -lc "export LD_LIBRARY_PATH=/home/dmdba/dmdbms/bin:$LD_LIBRARY_PATH; printf 'select unicode();\nexit;\n' | /home/dmdba/dmdbms/bin/disql SYSDBA/123456@localhost:5236"
+```
+
+- `UNICODE() = 1`：实例是 Unicode（UTF-8）
+- `UNICODE() = 0`：实例不是 Unicode，中文容易乱码
+
+注意：`CHARSET=1` 仅在首次初始化实例时生效，后续修改环境变量不会改变已初始化实例的字符集。
+
+### 重建为 UTF-8（会清空数据库数据）
+
+```bash
+# 1) 停掉并删除旧容器
+docker compose down
+
+# 2) 删除旧实例目录（确认不需要历史数据后执行）
+rm -rf ./dm8/data/* ./dm8/backup/*
+
+# 3) 确认 docker-compose.yml 中为 UTF-8
+# CHARSET=1
+
+# 4) 启动并重新初始化实例
+docker compose up -d
+
+# 5) 再次验证
+docker compose exec dm8 bash -lc "export LD_LIBRARY_PATH=/home/dmdba/dmdbms/bin:$LD_LIBRARY_PATH; printf 'select unicode();\nexit;\n' | /home/dmdba/dmdbms/bin/disql SYSDBA/123456@localhost:5236"
+```
+
+如果你通过 PDO 连接，建议 DSN 显式带上 `charset=utf8`：
+
+```php
+$pdo = new PDO('dm:host=dm8;port=5236;charset=utf8', 'SYSDBA', '123456');
 ```
 
 ## 达梦镜像说明

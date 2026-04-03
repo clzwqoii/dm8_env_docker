@@ -20,9 +20,9 @@ services:
     environment:
       - PAGE_SIZE=16
       - EXTENT_SIZE=16
-      - CASE_SENSITIVE=Y
+      - CASE_SENSITIVE=1
       - CHARSET=1 # 0=GB18030, 1=UTF-8
-      - LENGTH_IN_CHAR=Y
+      - LENGTH_IN_CHAR=1
       - DB_NAME=DAMENG
       - INSTANCE_NAME=DMSERVER
       - PORT_NUM=5236
@@ -30,8 +30,11 @@ services:
 
     # 数据持久化
     volumes:
-      - ./dm8/data:/opt/dmdbms/data
-      - ./dm8/backup:/opt/dmdbms/backup
+      - ./dm8/data:/home/dmdba/data
+      - ./dm8/backup:/home/dmdba/backup
+      - ./dm8/docker-entrypoint.sh:/docker-entrypoint.sh:ro
+
+    entrypoint: ["/bin/sh", "/docker-entrypoint.sh"]
 
     # 资源限制
     deploy:

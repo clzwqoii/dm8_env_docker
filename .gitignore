@@ -1,2 +1,6 @@
 .DS_Store
 .env
+
+# DM runtime data should never be committed
+dm8/data/
+dm8/backup/

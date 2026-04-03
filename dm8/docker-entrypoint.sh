@@ -1,98 +1,75 @@
-#!/bin/bash
-# 达梦数据库启动脚本
+#!/bin/sh
 
-set -e
+set -eu
 
-# 初始化数据库
-init_db() {
-    echo "初始化达梦数据库..."
-    
-    # 检查数据目录是否已初始化
-    if [ ! -f "$DM_HOME/data/DAMENG/dm.ini" ]; then
-        echo "首次启动，初始化数据库实例..."
-        
-        # 使用dminit初始化数据库
-        $DM_HOME/bin/dminit \
-            PATH=$DM_HOME/data \
-            DB_NAME=DAMENG \
-            INSTANCE_NAME=DMSERVER \
-            PORT_NUM=5236 \
-            PAGE_SIZE=${PAGE_SIZE:-16} \
-            EXTENT_SIZE=${EXTENT_SIZE:-16} \
-            CASE_SENSITIVE=${CASE_SENSITIVE:-Y} \
-            CHARSET=${CHARSET:-1} \
-            LENGTH_IN_CHAR=${LENGTH_IN_CHAR:-Y}
-        
-        echo "数据库初始化完成"
+DM_PATH=/home/dmdba/dmdbms
+DM_DATA_ROOT=/home/dmdba/data
+DM_DATA_DIR=${DM_DATA_ROOT}/DAMENG
+export LD_LIBRARY_PATH=${DM_PATH}/bin:${LD_LIBRARY_PATH:-}
+
+PAGE_SIZE=${PAGE_SIZE:-16}
+EXTENT_SIZE=${EXTENT_SIZE:-16}
+DB_NAME=${DB_NAME:-DAMENG}
+INSTANCE_NAME=${INSTANCE_NAME:-DMSERVER}
+PORT_NUM=${PORT_NUM:-5236}
+CHARSET=${CHARSET:-1}
+LENGTH_IN_CHAR=${LENGTH_IN_CHAR:-1}
+CASE_SENSITIVE=${CASE_SENSITIVE:-1}
+SYSDBA_PWD=${SYSDBA_PWD:-SYSDBA}
+
+NEW_INIT=0
+
+check_is_init() {
+    if [ -d "${DM_DATA_DIR}" ] && [ -f "${DM_DATA_DIR}/dm.ini" ]; then
+        DATABASE_ALREADY_EXISTS=true
     else
-        echo "数据库已存在，跳过初始化"
+        DATABASE_ALREADY_EXISTS=
     fi
 }
 
-# 启动数据库服务
-start_db() {
-    echo "启动达梦数据库服务..."
-    
-    # 检查授权文件
-    if [ -f "$DM_HOME/bin/dm.key" ]; then
-        echo "授权文件已存在"
-    else
-        echo "警告：授权文件不存在，请确保已放置授权文件"
+db_init() {
+    mkdir -p "${DM_DATA_DIR}"
+    chown -R dmdba:dinstall "${DM_DATA_ROOT}"
+
+    # Use explicit init args so charset is controllable instead of image defaults.
+    gosu dmdba "${DM_PATH}/bin/dminit" \
+        PATH="${DM_DATA_ROOT}" \
+        DB_NAME="${DB_NAME}" \
+        INSTANCE_NAME="${INSTANCE_NAME}" \
+        PORT_NUM="${PORT_NUM}" \
+        PAGE_SIZE="${PAGE_SIZE}" \
+        EXTENT_SIZE="${EXTENT_SIZE}" \
+        CASE_SENSITIVE="${CASE_SENSITIVE}" \
+        CHARSET="${CHARSET}" \
+        LENGTH_IN_CHAR="${LENGTH_IN_CHAR}"
+}
+
+install_services_if_needed() {
+    if [ ! -f "${DM_PATH}/bin/DmAPService" ]; then
+        "${DM_PATH}/script/root/dm_service_installer.sh" -s "${DM_PATH}/bin/DmAPService"
     fi
-    
-    # 启动数据库
-    $DM_HOME/bin/dmserver $DM_HOME/data/DAMENG/dm.ini &
-    
-    # 等待数据库启动
-    sleep 10
-    
-    # 检查是否启动成功
-    if pgrep -x "dmserver" > /dev/null; then
-        echo "达梦数据库启动成功！"
-        echo "端口: 5236"
-        echo "默认用户: SYSDBA"
-        echo "默认密码: 123456"
-    else
-        echo "达梦数据库启动失败，请检查日志"
-        exit 1
+    if [ ! -f "${DM_PATH}/bin/DmService${INSTANCE_NAME}" ]; then
+        "${DM_PATH}/script/root/dm_service_installer.sh" -t dmserver -p "${INSTANCE_NAME}" -dm_ini "${DM_DATA_DIR}/dm.ini"
     fi
 }
 
-# 修改默认密码
-change_password() {
-    if [ -n "$SYSDBA_PWD" ] && [ "$SYSDBA_PWD" != "123456" ]; then
-        echo "修改SYSDBA密码..."
-        echo "ALTER USER SYSDBA IDENTIFIED BY \"$SYSDBA_PWD\";" | \
-            $DM_HOME/bin/disql SYSDBA/123456@localhost:5236
-    fi
+start_services() {
+    gosu dmdba "${DM_PATH}/bin/DmAPService" start
+    gosu dmdba "${DM_PATH}/bin/DmService${INSTANCE_NAME}" start
 }
 
-# 主逻辑
-case "$1" in
-    start)
-        init_db
-        start_db
-        change_password
-        
-        # 保持容器运行
-        tail -f /dev/null
-        ;;
-    stop)
-        echo "停止达梦数据库..."
-        $DM_HOME/bin/dm_service_stop DMSERVER
-        ;;
-    restart)
-        $0 stop
-        sleep 2
-        $0 start
-        ;;
-    status)
-        $DM_HOME/bin/dm_service_status DMSERVER
-        ;;
-    bash|sh)
-        /bin/bash
-        ;;
-    *)
-        exec "$@"
-        ;;
-esac
+check_is_init
+if [ -z "${DATABASE_ALREADY_EXISTS}" ]; then
+    NEW_INIT=1
+    db_init
+fi
+
+install_services_if_needed
+start_services
+
+if [ "${NEW_INIT}" = "1" ] && [ "${SYSDBA_PWD}" != "SYSDBA" ]; then
+    printf "ALTER USER SYSDBA IDENTIFIED BY \"%s\";\nCOMMIT;\nEXIT;\n" "${SYSDBA_PWD}" | \
+        gosu dmdba "${DM_PATH}/bin/disql" "SYSDBA/SYSDBA@localhost:${PORT_NUM}" || true
+fi
+
+exec gosu dmdba tail -f "/home/dmdba/dmdbms/log/DmService${INSTANCE_NAME}.log"
