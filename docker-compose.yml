@@ -27,6 +27,8 @@ services:
       - INSTANCE_NAME=DMSERVER
       - PORT_NUM=5236
       - SYSDBA_PWD=123456
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
 
     # 数据持久化
     volumes:
@@ -85,6 +87,8 @@ services:
       - DM_PORT=5236
       - DM_USER=SYSDBA
       - DM_PWD=123456
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
 
     # 自动重启
     restart: unless-stopped
