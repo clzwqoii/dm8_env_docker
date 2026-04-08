@@ -58,6 +58,8 @@ Mac本地 ~/Sites/          Docker容器
 └── ...
 ```
 ### 域名映射
+### 端口使用8080, 默认8080
+lot.docker.yaanair.org:8080 
 
 # DM8 Docker 开发环境
 127.0.0.1       dm8.local
