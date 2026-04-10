@@ -1,5 +1,5 @@
 # PHP 8.3 + 达梦扩展 + Swoole + Phalcon + YAC Dockerfile
-FROM php:8.3-apache
+FROM php:8.3-fpm
 
 # 安装系统依赖
 # 添加了Swoole和Phalcon编译所需的依赖
@@ -131,9 +131,6 @@ RUN echo "extension=dm.so" >> /usr/local/etc/php/conf.d/z-dm.ini && \
 # 设置时区
 RUN echo "date.timezone=Asia/Shanghai" >> /usr/local/etc/php/conf.d/timezone.ini
 
-# 配置Apache
-RUN a2enmod rewrite headers
-
 # 工作目录
 WORKDIR /var/www/html
 
@@ -142,6 +139,6 @@ RUN chown -R www-data:www-data /var/www/html
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
+    CMD php-fpm -t || exit 1
 
-EXPOSE 80
+EXPOSE 9000
